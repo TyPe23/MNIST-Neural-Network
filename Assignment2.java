@@ -8,7 +8,7 @@
 */
 
 
-// import necessary libraries
+// import necessary packages
 import java.io.*;
 
 import java.util.Scanner;
@@ -27,8 +27,13 @@ public class Assignment2 {
 		sc.useDelimiter(",");
 
 		// print out all of the values to make sure it works
-		while (sc.hasNext()) {
-			System.out.print(sc.next());
+		int i = 0;
+
+		while (i < 783 * 3 + 4) {
+			if (sc.hasNext()) {
+				System.out.println(sc.next());
+			}
+			i++;
 		}
 
 		// close the .csv file before exiting
