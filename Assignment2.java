@@ -48,16 +48,19 @@ public class Assignment2 {
 		Network(nodesPerLayer);
 	}
 
+	// function that creates the weights and biases for the network
 	public static void Network(int[] nodes) {
 		numLayers = nodes.length;
 		
 		for(int i = 0; i < numLayers - 1; i++) {
 			biases[i] = new double[nodes[i + 1]];
 			for(int j = 0; j < nodes[i + 1]; j++) {
-				biases[i][j] = Math.random() * 2 - 0.5;
-				System.out.print(biases[i][j] + " ");
+				biases[i][j] = Math.random() * 2 - 1;
+				//System.out.print(biases[i][j] + " ");
 			}
-			System.out.println("");
+			// System.out.println("");
 		}
+
+		
 	}
 }
