@@ -16,6 +16,8 @@ import java.lang.Math;
 // main class
 public class Assignment2 {
 
+	public static int[][] training_data;
+	public static int[][] testing_data;
 	public static int numLayers;
 	public static double[][] biases = new double[2][];
 	public static double[][][] weights = new double[3][][];
@@ -31,19 +33,33 @@ public class Assignment2 {
 		train.useDelimiter(",");
 		test.useDelimiter(",");
 
-		/* // print out all of the values to make sure it works
+		// put all of the values of the training data into a 2D array
 		int i = 0;
-
-		while (i < 783 * 3 + 4) {
-			if (train.hasNext()) {
-				System.out.print(train.next());
+		int j = 0;
+		while (train.hasNext()) {
+			training_data[i][j] = Integer.valueOf(train.next());
+			j++;
+			if (j == 785){
+				i++;
+				j = 0;
 			}
-			i++;
+		}
+
+		// put all of the values of the testing data into a 2D array
+		i = 0;
+		j = 0;
+		while (test.hasNext()) {
+			testing_data[i][j] = Integer.valueOf(test.next());
+			j++;
+			if (j == 785){
+				i++;
+				j = 0;
+			}
 		}
 
 		// close the .csv file before exiting
 		train.close();
-		test.close(); */
+		test.close();
 		int[] nodesPerLayer = {784,15,10};
 		Network(nodesPerLayer);
 	}
@@ -56,7 +72,11 @@ public class Assignment2 {
 		for(int i = 0; i < numLayers - 1; i++) {
 			// allocates the memory for each layers' biases
 			biases[i] = new double[nodes[i + 1]];
+
+			// for loop that assigns values to each of the biases
 			for(int j = 0; j < nodes[i + 1]; j++) {
+
+				// random values from -1 to 1
 				biases[i][j] = Math.random() * 2 - 1;
 				System.out.print(biases[i][j] + " ");
 			}
@@ -67,8 +87,10 @@ public class Assignment2 {
 		for(int i = 0; i < numLayers - 1; i++) {
 			// allocates the memory for each layers' weights
 			weights[i] = new double[nodes[i]][nodes[i + 1]];
-			System.out.println(weights.length);
-			//for(int j = 0; j < )
+			
+			for(int j = 0; j < nodes[i]; i++) {
+
+			}
 		}
 	}
 }
