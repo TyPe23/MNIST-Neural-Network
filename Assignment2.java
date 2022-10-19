@@ -98,20 +98,22 @@ public class Assignment2 {
 			// allocates the memory for each layers' weights
 			weights[i] = new double[nodes[i]][nodes[i + 1]];
 
-			//System.out.print("Layer " + i);
+			System.out.print("Layer " + i);
 
 			// for loop that iterates through each node
 			for(int j = 0; j < weights[i].length; j++) {
 				
-				//System.out.print(" Node: " + j);
+				System.out.print(" Node: " + j);
 				// for loop that iterates through each weight
 				for(int k = 0; k < weights[i][j].length; k++) {
 					// random value from -1 to 1
 					weights[i][j][k] = Math.random() * 2 - 1;
 				}
-				//System.out.print(" Weights: " + weights[i][j].length);
+				System.out.print(" Weights: " + weights[i][j].length);
 			}
-			//System.out.println("");
+			System.out.println("");
 		}
 	}
+
+	
 }
