@@ -12,6 +12,7 @@
 import java.io.*;
 import java.util.Scanner;
 import java.lang.Math;
+import java.util.Arrays;
 
 // main class
 public class Assignment2 {
@@ -75,6 +76,8 @@ public class Assignment2 {
 		test.close();
 		int[] nodesPerLayer = {784,15,10};
 		Network(nodesPerLayer);
+
+		System.out.println(Arrays.toString(feedForward(Arrays.copyOfRange(training_data[0], 1, training_data[0].length))));
 	}
 
 	// function that creates the weights and biases for the network
@@ -96,7 +99,7 @@ public class Assignment2 {
 		// for loop that iterates through each layer
 		for(int i = 0; i < nodes.length - 1; i++) {
 			// allocates the memory for each layers' weights
-			weights[i] = new double[nodes[i]][nodes[i + 1]];
+			weights[i] = new double[nodes[i + 1]][nodes[i]];
 
 			//System.out.println("Layer " + i);
 
@@ -115,14 +118,34 @@ public class Assignment2 {
 		}
 	}
 
-	public static void feedForward(double[][] input) {
+	// feed forward function that takes an input of an array of 784 doubles which represents one of the pixels of a hand written number
+	public static double[] feedForward(double[] a) {
+		// for loop that goes through each layers
 		for (int i = 0; i < biases.length; i++) {
+			// temporary array of doubles with a length equal to the number of nodes in the layer
+			double[] temp = new double[biases[i].length]; 
+			// for loop that goes through each node
 			for (int j = 0; j < weights[i].length; j++) {
-
+				// starting value of 0 for the summation of activation values times their weights
+				double sumWA = 0;
+				// for loop that goes through each input for the node
+				for (int k = 0; k < weights[i][j].length; k++) {
+					// multiply the activation value times the weight and add it to the sum
+					sumWA += a[k] * weights[i][j][k];
+				}
+				// set the result of the sigmoid to the current index of temp
+				temp[j] = sigmoid(sumWA + biases[i][j]);
 			}
+			// replace the input array which was the activation values of the previous layer 
+			// with the temp array which represents the activation values of the current layer
+			// so that the values can either be returned or used for the next layer
+			a = temp;
 		}
+		// returns the activation values of the final layer of the network
+		return a;
 	}
 
+	// sigmoid activation function
 	public static double sigmoid(double z) {
 		return 1 / (1 + Math.exp(-z));
 	}
