@@ -137,15 +137,60 @@ public class Assignment2 {
 
 		int miniBatchSize = 10;
 		for (int j = 0; j < training_indices_copy.length;) {
+
 			double[][] outputs = new double[miniBatchSize][biases[biases.length - 1].length];
+
 			for (int k = 0; k < miniBatchSize; k++, j++) {
-				outputs[k] = feedForward(Arrays.copyOfRange(training_data[training_indices_copy[j]], 1, training_data[training_indices_copy[j]].length));
-				System.out.println(Arrays.toString(outputs[k]));
+				//outputs[k] = feedForward(Arrays.copyOfRange(training_data[training_indices_copy[j]], 1, training_data[training_indices_copy[j]].length));
+				BackProp(Arrays.copyOfRange(training_data[training_indices_copy[j]], 1, training_data[training_indices_copy[j]].length));
+
+				//System.out.println(Arrays.toString(outputs[k]));
 			}
 		}
 	}
 
-	//System.out.println(Arrays.toString(feedForward(Arrays.copyOfRange(training_data[training_indices_copy[j]], 1, training_data[training_indices_copy[j]].length))));
+	// THIS IS WHAT YOU NEED TO WORK ON NOW
+	public static double[] BackProp(double[] a) {
+		// for loop that goes through each layers
+		for (int i = 0; i < biases.length; i++) {
+			// temporary array of doubles with a length equal to the number of nodes in the layer
+			double[] temp = new double[biases[i].length]; 
+			// for loop that goes through each node
+			for (int j = 0; j < weights[i].length; j++) {
+				// starting value of 0 for the summation of activation values times their weights
+				double sumWA = 0;
+				// for loop that goes through each input for the node
+				for (int k = 0; k < weights[i][j].length; k++) {
+					// multiply the activation value times the weight and add it to the sum
+					sumWA += a[k] * weights[i][j][k];
+				}
+				// set the result of the sigmoid to the current index of temp
+				temp[j] = sigmoid(sumWA + biases[i][j]);
+			}
+			// replace the input array which was the activation values of the previous layer 
+			// with the temp array which represents the activation values of the current layer
+			// so that the values can either be returned or used for the next layer
+			a = temp;
+		}
+		// returns the activation values of the final layer of the network
+		return a;
+	}
+
+	// function that returns a one hot vector from the input of the expected output for the handwritten number
+	public static int[] oneHotVector(double expectedOut) {
+		int[] OHV = new int[biases[biases.length - 1].length];
+
+		for (int i = 0; i < OHV.length; i++) {
+			if (i == expectedOut * 255) {
+				OHV[i] = 1;
+			}
+			else {
+				OHV[i] = 0;
+			}
+		}
+
+		return OHV;
+	}
 
 	// feed forward function that takes an input of an array of 784 doubles which represents one of the pixels of a hand written number
 	public static double[] feedForward(double[] a) {
