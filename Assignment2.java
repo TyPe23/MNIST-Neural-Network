@@ -17,8 +17,8 @@ import java.lang.Math;
 public class Assignment2 {
 
 	// 2D arrays containing training and testing data
-	public static int[][] training_data = new int[60000][785];
-	public static int[][] testing_data = new int[10000][785];
+	public static double[][] training_data = new double[60000][785];
+	public static double[][] testing_data = new double[10000][785];
 
 	// indices of training data array
 	public static int[] training_indices = new int[60000];
@@ -42,7 +42,7 @@ public class Assignment2 {
 		int i = 0;
 		int j = 0;
 		while (train.hasNext()) {
-			training_data[i][j] = Integer.valueOf(train.next());
+			training_data[i][j] = Double.valueOf(train.next()) / 255;
 			j++;
 
 			if (j == 785){
@@ -55,7 +55,7 @@ public class Assignment2 {
 		i = 0;
 		j = 0;
 		while (test.hasNext()) {
-			testing_data[i][j] = Integer.valueOf(test.next());
+			testing_data[i][j] = Double.valueOf(test.next()) / 255;
 			j++;
 
 			if (j == 785){
@@ -98,22 +98,32 @@ public class Assignment2 {
 			// allocates the memory for each layers' weights
 			weights[i] = new double[nodes[i]][nodes[i + 1]];
 
-			System.out.print("Layer " + i);
+			//System.out.println("Layer " + i);
 
 			// for loop that iterates through each node
 			for(int j = 0; j < weights[i].length; j++) {
 				
-				System.out.print(" Node: " + j);
+				//System.out.print(" N: " + j);
 				// for loop that iterates through each weight
 				for(int k = 0; k < weights[i][j].length; k++) {
 					// random value from -1 to 1
 					weights[i][j][k] = Math.random() * 2 - 1;
 				}
-				System.out.print(" Weights: " + weights[i][j].length);
+				//System.out.print(" W: " + weights[i][j].length + "\n");
 			}
-			System.out.println("");
+			//System.out.println();
 		}
 	}
 
-	
+	public static void feedForward(double[][] input) {
+		for (int i = 0; i < biases.length; i++) {
+			for (int j = 0; j < weights[i].length; j++) {
+
+			}
+		}
+	}
+
+	public static double sigmoid(double z) {
+		return 1 / (1 + Math.exp(-z));
+	}
 }
