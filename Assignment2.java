@@ -13,6 +13,7 @@ import java.io.*;
 import java.util.Scanner;
 import java.lang.Math;
 import java.util.Arrays;
+import java.util.Random;
 
 // main class
 public class Assignment2 {
@@ -74,10 +75,12 @@ public class Assignment2 {
 		// close the .csv file before exiting
 		train.close();
 		test.close();
+
+		// create the network
 		int[] nodesPerLayer = {784,15,10};
 		Network(nodesPerLayer);
 
-		System.out.println(Arrays.toString(feedForward(Arrays.copyOfRange(training_data[0], 1, training_data[0].length))));
+		SGD();
 	}
 
 	// function that creates the weights and biases for the network
@@ -117,6 +120,32 @@ public class Assignment2 {
 			//System.out.println();
 		}
 	}
+
+	// function that performs Stochastic Gradient Descent to train the network
+	public static void SGD() {
+		// randomize the training set by moving around the indicies
+		// make a copy of the training set as to not scramble the original
+		int[] training_indices_copy = training_indices;
+		Random rand = new Random();
+
+		for(int i = 0; i < training_indices_copy.length; i++) {
+			int randIndx = rand.nextInt(training_indices_copy.length);
+			int temp = training_indices_copy[randIndx];
+			training_indices_copy[randIndx] = training_indices_copy[i];
+			training_indices_copy[i] = temp;
+		}
+
+		int miniBatchSize = 10;
+		for (int j = 0; j < training_indices_copy.length;) {
+			double[][] outputs = new double[miniBatchSize][biases[biases.length - 1].length];
+			for (int k = 0; k < miniBatchSize; k++, j++) {
+				outputs[k] = feedForward(Arrays.copyOfRange(training_data[training_indices_copy[j]], 1, training_data[training_indices_copy[j]].length));
+				System.out.println(Arrays.toString(outputs[k]));
+			}
+		}
+	}
+
+	//System.out.println(Arrays.toString(feedForward(Arrays.copyOfRange(training_data[training_indices_copy[j]], 1, training_data[training_indices_copy[j]].length))));
 
 	// feed forward function that takes an input of an array of 784 doubles which represents one of the pixels of a hand written number
 	public static double[] feedForward(double[] a) {
