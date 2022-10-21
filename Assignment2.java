@@ -29,6 +29,10 @@ public class Assignment2 {
 	public static double[][] biases = new double[2][];
 	public static double[][][] weights = new double[2][][];
 
+	// multidementional arrays of weight and bias gradients
+	public static double[][] biasGradients = new double[2][];
+	public static double[][][] weightGradients = new double[2][][];
+
 	// start here
 	public static void main(String[] args) throws Exception{
 
@@ -95,6 +99,7 @@ public class Assignment2 {
 			for(int j = 0; j < nodes[i + 1]; j++) {
 				// random values from -1 to 1 
 				biases[i][j] = Math.random() * 2 - 1;
+				biasGradients[i][j] = 0;
 			}
 		}
 
@@ -114,10 +119,27 @@ public class Assignment2 {
 				for(int k = 0; k < weights[i][j].length; k++) {
 					// random value from -1 to 1
 					weights[i][j][k] = Math.random() * 2 - 1;
+					weightGradients[i][j][k] = 0;
 				}
 				//System.out.print(" W: " + weights[i][j].length + "\n");
 			}
 			//System.out.println();
+		}
+	}
+
+	public static void reset() {
+		for(int i = 0; i < biases.length; i++) {
+			for(int j = 0; j < biases[i].length; j++) {
+				biasGradients[i][j] = 0;
+			}
+		}
+
+		for(int i = 0; i < biases.length - 1; i++) {
+			for(int j = 0; j < weights[i].length; j++) {
+				for(int k = 0; k < weights[i][j].length; k++) {
+					weightGradients[i][j][k] = 0;
+				}
+			}
 		}
 	}
 
@@ -138,11 +160,10 @@ public class Assignment2 {
 		int miniBatchSize = 10;
 		for (int j = 0; j < training_indices_copy.length;) {
 
-			double[][] outputs = new double[miniBatchSize][biases[biases.length - 1].length];
+			reset();
 
 			for (int k = 0; k < miniBatchSize; k++, j++) {
-				//outputs[k] = feedForward(Arrays.copyOfRange(training_data[training_indices_copy[j]], 1, training_data[training_indices_copy[j]].length));
-				BackProp(Arrays.copyOfRange(training_data[training_indices_copy[j]], 1, training_data[training_indices_copy[j]].length));
+				backProp(Arrays.copyOfRange(training_data[training_indices_copy[j]], 1, training_data[training_indices_copy[j]].length), training_indices_copy[j]);
 
 				//System.out.println(Arrays.toString(outputs[k]));
 			}
@@ -150,7 +171,7 @@ public class Assignment2 {
 	}
 
 	// THIS IS WHAT YOU NEED TO WORK ON NOW
-	public static double[] BackProp(double[] a) {
+	public static double[] backProp(double[] a, int index) {
 		// for loop that goes through each layers
 		for (int i = 0; i < biases.length; i++) {
 			// temporary array of doubles with a length equal to the number of nodes in the layer
@@ -170,6 +191,7 @@ public class Assignment2 {
 			// replace the input array which was the activation values of the previous layer 
 			// with the temp array which represents the activation values of the current layer
 			// so that the values can either be returned or used for the next layer
+			
 			a = temp;
 		}
 		// returns the activation values of the final layer of the network
