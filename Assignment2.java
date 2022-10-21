@@ -171,31 +171,49 @@ public class Assignment2 {
 	}
 
 	// THIS IS WHAT YOU NEED TO WORK ON NOW
-	public static double[] backProp(double[] a, int index) {
+	public static void backProp(double[] a, int index) {
+		
+		double[][] temp = new double[biases.length][]; 
+
 		// for loop that goes through each layers
 		for (int i = 0; i < biases.length; i++) {
-			// temporary array of doubles with a length equal to the number of nodes in the layer
-			double[] temp = new double[biases[i].length]; 
+
+			temp[i] = new double[biases[i].length]; 
+
 			// for loop that goes through each node
 			for (int j = 0; j < weights[i].length; j++) {
-				// starting value of 0 for the summation of activation values times their weights
+
 				double sumWA = 0;
+
 				// for loop that goes through each input for the node
 				for (int k = 0; k < weights[i][j].length; k++) {
-					// multiply the activation value times the weight and add it to the sum
+
 					sumWA += a[k] * weights[i][j][k];
 				}
-				// set the result of the sigmoid to the current index of temp
-				temp[j] = sigmoid(sumWA + biases[i][j]);
+				temp[i][j] = sigmoid(sumWA + biases[i][j]);
 			}
-			// replace the input array which was the activation values of the previous layer 
-			// with the temp array which represents the activation values of the current layer
-			// so that the values can either be returned or used for the next layer
-			
-			a = temp;
+			a = temp[i];
 		}
-		// returns the activation values of the final layer of the network
-		return a;
+		
+		
+
+		for(int i = biases.length - 1; i > 0; i--) {
+			for(int j = 0; j < weights[i].length; j++) {
+
+				double sumWB = 0;
+
+				for(int k = 0; k < weights[i][j].length; k++) {
+					sumWB += weightGradients[i + 1][j][k] * biasGradients[i + 1][j];
+				}
+
+				if (i != biases.length - 1) {
+					biasGradients[i][j] = sumWB * temp[i][j] * (1 - temp[i][j]);
+				}
+				else {
+					biasGradients[i][j] = (temp[i][j] - oneHotVector(training_data[index][0])[j]) * temp[i][j] * (1 - temp[i][j]);
+				}
+			}
+		}
 	}
 
 	// function that returns a one hot vector from the input of the expected output for the handwritten number
