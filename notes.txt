@@ -1,0 +1,6 @@
+i = 0-1
+j = 0-14
+k = 0-783
+					w.length = 2		biases.length = 2
+a.length = 784		w[].length = 15
+					w[][].length = 784	biases[].length = 15
