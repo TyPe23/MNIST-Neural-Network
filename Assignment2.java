@@ -177,24 +177,27 @@ public class Assignment2 {
 
 		// for loop that goes through each layers
 		for (int i = 0; i < biases.length; i++) {
-
+			// temporary array of doubles with a length equal to the number of nodes in the layer
 			temp[i] = new double[biases[i].length]; 
 
 			// for loop that goes through each node
 			for (int j = 0; j < weights[i].length; j++) {
-
+				// starting value of 0 for the summation of activation values times their weights
 				double sumWA = 0;
 
 				// for loop that goes through each input for the node
 				for (int k = 0; k < weights[i][j].length; k++) {
-
+					// multiply the activation value times the weight and add it to the sum
 					sumWA += a[k] * weights[i][j][k];
 				}
+				// set the result of the sigmoid to the current index of temp
 				temp[i][j] = sigmoid(sumWA + biases[i][j]);
 			}
+			// replace the input array which was the activation values of the previous layer 
+			// with the temp array which represents the activation values of the current layer
+			// so that the values can either be returned or used for the next layer
 			a = temp[i];
 		}
-		
 		
 
 		for(int i = biases.length - 1; i > 0; i--) {
