@@ -94,6 +94,7 @@ public class Assignment2 {
 		for(int i = 0; i < nodes.length - 1; i++) {
 			// allocates the memory for each layers' biases
 			biases[i] = new double[nodes[i + 1]];
+			biasGradients[i] = new double[nodes[i + 1]];
 
 			// for loop iterates through each node
 			for(int j = 0; j < nodes[i + 1]; j++) {
@@ -108,22 +109,23 @@ public class Assignment2 {
 		for(int i = 0; i < nodes.length - 1; i++) {
 			// allocates the memory for each layers' weights
 			weights[i] = new double[nodes[i + 1]][nodes[i]];
+			weightGradients[i] = new double[nodes[i + 1]][nodes[i]];
 
-			System.out.println("Layer " + i);
+			//System.out.println("Layer " + i);
 
 			// for loop that iterates through each node
 			for(int j = 0; j < weights[i].length; j++) {
 				
-				System.out.print(" N: " + j);
+				//System.out.print(" N: " + j);
 				// for loop that iterates through each weight
 				for(int k = 0; k < weights[i][j].length; k++) {
 					// random value from -1 to 1
 					weights[i][j][k] = Math.random() * 2 - 1;
 					weightGradients[i][j][k] = 0;
 				}
-				System.out.print(" W: " + weights[i][j].length + "\n");
+				//System.out.print(" W: " + weights[i][j].length + "\n");
 			}
-			System.out.println();
+			//System.out.println();
 		}
 	}
 
@@ -173,12 +175,14 @@ public class Assignment2 {
 	// THIS IS WHAT YOU NEED TO WORK ON NOW
 	public static void backProp(double[] a, int index) {
 		
-		double[][] temp = new double[biases.length][]; 
+		double[][] activations = new double[biases.length + 1][]; 
+
+		activations[0] = a;
 
 		// for loop that goes through each layers
 		for (int i = 0; i < biases.length; i++) {
 			// temporary array of doubles with a length equal to the number of nodes in the layer
-			temp[i] = new double[biases[i].length]; 
+			activations[i + 1] = new double[biases[i].length]; 
 
 			// for loop that goes through each node
 			for (int j = 0; j < weights[i].length; j++) {
@@ -190,13 +194,13 @@ public class Assignment2 {
 					// multiply the activation value times the weight and add it to the sum
 					sumWA += a[k] * weights[i][j][k];
 				}
-				// set the result of the sigmoid to the current index of temp
-				temp[i][j] = sigmoid(sumWA + biases[i][j]);
+				// set the result of the sigmoid to the current index of activations
+				activations[i + 1][j] = sigmoid(sumWA + biases[i][j]);
 			}
 			// replace the input array which was the activation values of the previous layer 
-			// with the temp array which represents the activation values of the current layer
+			// with the activations array which represents the activation values of the current layer
 			// so that the values can either be returned or used for the next layer
-			a = temp[i];
+			a = activations[i + 1];
 		}
 		
 
@@ -205,15 +209,19 @@ public class Assignment2 {
 
 				double sumWB = 0;
 
-				for(int k = 0; k < weights[i][j].length; k++) {
-					sumWB += weightGradients[i + 1][j][k] * biasGradients[i + 1][j];
-				}
-
+				// if not on the final layer
 				if (i != biases.length - 1) {
-					biasGradients[i][j] = sumWB * temp[i][j] * (1 - temp[i][j]);
+					for(int k = 0; k < weights[i][j].length; k++) {
+						sumWB += weights[i + 1][j][k] * biasGradients[i + 1][j];
+					}
+					biasGradients[i][j] = sumWB * activations[i + 1][j] * (1 - activations[i + 1][j]);
 				}
+				// if on the final layer
 				else {
-					biasGradients[i][j] = (temp[i][j] - oneHotVector(training_data[index][0])[j]) * temp[i][j] * (1 - temp[i][j]);
+					biasGradients[i][j] = (activations[i + 1][j] - oneHotVector(training_data[index][0])[j]) * activations[i + 1][j] * (1 - activations[i + 1][j]);
+				}
+				for(int k = 0; k < weights[i][j].length; k++) {
+					weightGradients[i][j][k] = activations[i][j] * biasGradients[i][j];
 				}
 			}
 		}
