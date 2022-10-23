@@ -44,36 +44,25 @@ public class Assignment2 {
 		train.useDelimiter(",|\\n");
 		test.useDelimiter(",|\\n");
 
-		// put all of the values of the training data into a 2D array
+		// put all of the values of the training and testing data into 2D arrays
 		int i = 0;
 		int j = 0;
 		while (train.hasNext()) {
-			training_data[i][j] = Double.valueOf(train.next()) / 255;
-			j++;
 
-			if (j == 785){
-				i++;
-				j = 0;
-			}
-		}
-
-		// put all of the values of the testing data into a 2D array
-		i = 0;
-		j = 0;
-		while (test.hasNext()) {
-			testing_data[i][j] = Double.valueOf(test.next()) / 255;
-			j++;
-
-			if (j == 785){
-				i++;
-				j = 0;
-			}
-		}
-
-		i = 0;
-		while (i < 60000) {
 			training_indices[i] = i;
-			i++;
+
+			training_data[i][j] = Double.valueOf(train.next()) / 255;
+
+			if (test.hasNext()) {
+				testing_data[i][j] = Double.valueOf(test.next()) / 255;
+			}
+
+			j++;
+
+			if (j == 785){
+				i++;
+				j = 0;
+			}
 		}
 
 		// close the .csv file before exiting
@@ -89,36 +78,31 @@ public class Assignment2 {
 
 	// function that creates the weights and biases for the network
 	public static void Network(int[] nodes) {
-		// biases
+
 		// for loop that iterates through each layer
 		for(int i = 0; i < nodes.length - 1; i++) {
-			// allocates the memory for each layers' biases
+
+			// allocates the memory for bias
 			biases[i] = new double[nodes[i + 1]];
 			biasGradients[i] = new double[nodes[i + 1]];
 
-			// for loop iterates through each node
-			for(int j = 0; j < nodes[i + 1]; j++) {
-				// random values from -1 to 1 
-				biases[i][j] = Math.random() * 2 - 1;
-				biasGradients[i][j] = 0;
-			}
-		}
-
-		// weights
-		// for loop that iterates through each layer
-		for(int i = 0; i < nodes.length - 1; i++) {
-			// allocates the memory for each layers' weights
+			// allocates the memory for weight
 			weights[i] = new double[nodes[i + 1]][nodes[i]];
 			weightGradients[i] = new double[nodes[i + 1]][nodes[i]];
 
 			//System.out.println("Layer " + i);
 
-			// for loop that iterates through each node
-			for(int j = 0; j < weights[i].length; j++) {
-				
+			// iterates through each input for the node
+			for(int j = 0; j < nodes[i + 1]; j++) {
+
+				// random values from -1 to 1 
+				biases[i][j] = Math.random() * 2 - 1;
+				biasGradients[i][j] = 0;
+
 				//System.out.print(" N: " + j);
 				// for loop that iterates through each weight
 				for(int k = 0; k < weights[i][j].length; k++) {
+
 					// random value from -1 to 1
 					weights[i][j][k] = Math.random() * 2 - 1;
 					weightGradients[i][j][k] = 0;
@@ -129,141 +113,200 @@ public class Assignment2 {
 		}
 	}
 
+	// resets weight and bias gradients to 0
 	public static void reset() {
-		for(int i = 0; i < biases.length; i++) {
-			for(int j = 0; j < biases[i].length; j++) {
-				biasGradients[i][j] = 0;
-			}
-		}
 
-		for(int i = 0; i < biases.length - 1; i++) {
-			for(int j = 0; j < weights[i].length; j++) {
+		// iterates through layers
+		for(int i = 0; i < biases.length; i++) {
+
+			// iterates through nodes
+			for(int j = 0; j < biases[i].length; j++) {
+
+				biasGradients[i][j] = 0;
+
+				// iterates through each input for the node
 				for(int k = 0; k < weights[i][j].length; k++) {
+
 					weightGradients[i][j][k] = 0;
 				}
 			}
 		}
 	}
 
-	// function that performs Stochastic Gradient Descent to train the network
+	// performs Stochastic Gradient Descent
 	public static void SGD() {
-		// randomize the training set by moving around the indicies
-		// make a copy of the training set as to not scramble the original
-		int[] training_indices_copy = training_indices;
+
+		// make a copy of the training indices as to not scramble the original
+		int[] indices_copy = training_indices;
 		Random rand = new Random();
 
-		for(int i = 0; i < training_indices_copy.length; i++) {
-			int randIndx = rand.nextInt(training_indices_copy.length);
-			int temp = training_indices_copy[randIndx];
-			training_indices_copy[randIndx] = training_indices_copy[i];
-			training_indices_copy[i] = temp;
+		// randomize training indicies
+		for(int i = 0; i < indices_copy.length; i++) {
+
+			int randIndx = rand.nextInt(indices_copy.length);
+			int temp = indices_copy[randIndx];
+			indices_copy[randIndx] = indices_copy[i];
+			indices_copy[i] = temp;
 		}
 
 		int miniBatchSize = 10;
-		for (int j = 0; j < training_indices_copy.length;) {
+		// iterates through training data
+		for (int j = 0; j < indices_copy.length;) {
 
+			// sets gradients to 0
 			reset();
 
+			// iterates through mini batch
 			for (int k = 0; k < miniBatchSize; k++, j++) {
-				backProp(Arrays.copyOfRange(training_data[training_indices_copy[j]], 1, training_data[training_indices_copy[j]].length), training_indices_copy[j]);
 
-				//System.out.println(Arrays.toString(outputs[k]));
+				// back propagation of the current piece of training data
+				backProp(Arrays.copyOfRange(training_data[indices_copy[j]], 1, training_data[indices_copy[j]].length), indices_copy[j]);
 			}
+
+			// updates gradients
+			updateGradients();
 		}
 	}
 
-	// THIS IS WHAT YOU NEED TO WORK ON NOW
+	// performs back propagation
 	public static void backProp(double[] a, int index) {
 		
+		// array of activations for each layer
 		double[][] activations = new double[biases.length + 1][]; 
 
+		int[] OHV = oneHotVector(training_data[index][0]);
+
+		// set first layer to input
 		activations[0] = a;
 
-		// for loop that goes through each layers
+		// iterates through layers
 		for (int i = 0; i < biases.length; i++) {
-			// temporary array of doubles with a length equal to the number of nodes in the layer
+
+			// initializes activations array of current layer
 			activations[i + 1] = new double[biases[i].length]; 
 
-			// for loop that goes through each node
+			// iterates through nodes
 			for (int j = 0; j < weights[i].length; j++) {
-				// starting value of 0 for the summation of activation values times their weights
+
+				// starting value of sum of activation values times weights
 				double sumWA = 0;
 
-				// for loop that goes through each input for the node
+				// iterates through each input for the node
 				for (int k = 0; k < weights[i][j].length; k++) {
-					// multiply the activation value times the weight and add it to the sum
+					
+					// add to sum of activation values times weights
 					sumWA += a[k] * weights[i][j][k];
 				}
 				// set the result of the sigmoid to the current index of activations
 				activations[i + 1][j] = sigmoid(sumWA + biases[i][j]);
 			}
-			// replace the input array which was the activation values of the previous layer 
-			// with the activations array which represents the activation values of the current layer
-			// so that the values can either be returned or used for the next layer
+			// replace the input array with the activation values of the current layer
 			a = activations[i + 1];
 		}
 		
-
+		// iterates through layers
 		for(int i = biases.length - 1; i > 0; i--) {
+
+			// iterates through nodes
 			for(int j = 0; j < weights[i].length; j++) {
 
+				// starting value of sum of weights times bias gradient
 				double sumWB = 0;
 
 				// if not on the final layer
 				if (i != biases.length - 1) {
+
+					// add to sum of weights times bias gradient
 					for(int k = 0; k < weights[i][j].length; k++) {
+
 						sumWB += weights[i + 1][j][k] * biasGradients[i + 1][j];
 					}
-					biasGradients[i][j] = sumWB * activations[i + 1][j] * (1 - activations[i + 1][j]);
+					// add to bias gradient
+					biasGradients[i][j] += sumWB * activations[i + 1][j] * (1 - activations[i + 1][j]);
 				}
 				// if on the final layer
 				else {
-					biasGradients[i][j] = (activations[i + 1][j] - oneHotVector(training_data[index][0])[j]) * activations[i + 1][j] * (1 - activations[i + 1][j]);
+					// add to bias gradient
+					biasGradients[i][j] += (activations[i + 1][j] - OHV[j]) * activations[i + 1][j] * (1 - activations[i + 1][j]);
 				}
+
+				// add to weight gradients
 				for(int k = 0; k < weights[i][j].length; k++) {
-					weightGradients[i][j][k] = activations[i][j] * biasGradients[i][j];
+
+					weightGradients[i][j][k] += activations[i][j] * biasGradients[i][j];
 				}
 			}
 		}
 	}
 
-	// function that returns a one hot vector from the input of the expected output for the handwritten number
+	// performs gradient updates
+	public static void updateGradients() {
+
+		// iterates through layers
+		for(int i = 0; i < biases.length; i++) {
+
+			// iterates through nodes
+			for(int j = 0; j < biases[i].length; j++) {
+
+				// update bias
+				biases[i][j] = biases[i][j] - 3/10 * biasGradients[i][j];
+
+				// iterates through weights
+				for(int k = 0; k < weights[i][j].length; k++) {
+
+					// update weight
+					weights[i][j][k] = weights[i][j][k] - 3/10 * weightGradients[i][j][k];
+				}
+			}
+		}
+	}
+
+	// creates one hot vector of expected
 	public static int[] oneHotVector(double expectedOut) {
+
+		// initialize empty one hot vector
 		int[] OHV = new int[biases[biases.length - 1].length];
 
+		// iterates through OHV indices
 		for (int i = 0; i < OHV.length; i++) {
+
+			// set to 1 if index matches output
 			if (i == expectedOut * 255) {
 				OHV[i] = 1;
 			}
+			// set to 0 otherwise
 			else {
 				OHV[i] = 0;
 			}
 		}
-
 		return OHV;
 	}
 
-	// feed forward function that takes an input of an array of 784 doubles which represents one of the pixels of a hand written number
+	// performs feed forward pass on given testing data (not used in backProp function)
 	public static double[] feedForward(double[] a) {
-		// for loop that goes through each layers
+
+		// iterates through layers
 		for (int i = 0; i < biases.length; i++) {
+
 			// temporary array of doubles with a length equal to the number of nodes in the layer
 			double[] temp = new double[biases[i].length]; 
-			// for loop that goes through each node
+
+			// iterates through node
 			for (int j = 0; j < weights[i].length; j++) {
-				// starting value of 0 for the summation of activation values times their weights
+
+				// starting value of sum of activation values times weights
 				double sumWA = 0;
-				// for loop that goes through each input for the node
+
+				// iterates through input for the node
 				for (int k = 0; k < weights[i][j].length; k++) {
-					// multiply the activation value times the weight and add it to the sum
+					
+					// add to sum of activation values times weights
 					sumWA += a[k] * weights[i][j][k];
 				}
 				// set the result of the sigmoid to the current index of temp
 				temp[j] = sigmoid(sumWA + biases[i][j]);
 			}
-			// replace the input array which was the activation values of the previous layer 
-			// with the temp array which represents the activation values of the current layer
-			// so that the values can either be returned or used for the next layer
+			// replace the input array with the activation values of the current layer
 			a = temp;
 		}
 		// returns the activation values of the final layer of the network
