@@ -25,6 +25,12 @@ public class Assignment2 {
 	// indices of training data array
 	public static int[] training_indices = new int[60000];
 
+	// array of the number of each digit
+	public static int[] digits = {0,0,0,0,0,0,0,0,0,0};
+
+	// array of the correct answers of each digit
+	public static int[] digitsAns = {0,0,0,0,0,0,0,0,0,0};
+
 	// multidementional arrays of weights and biases
 	public static double[][] biases = new double[2][];
 	public static double[][][] weights = new double[2][][];
@@ -65,6 +71,10 @@ public class Assignment2 {
 			}
 		}
 
+		for (int k = 0; k < 60000; k++) {
+			digits[(int)(training_data[k][0] * 255)] += 1;
+		}
+
 		// close the .csv file before exiting
 		train.close();
 		test.close();
@@ -73,7 +83,20 @@ public class Assignment2 {
 		int[] nodesPerLayer = {784,15,10};
 		Network(nodesPerLayer);
 
+		System.out.println(weights[0].length);
+		System.out.println(weights[1].length);
+		System.out.println();
+		System.out.println(biases[0].length);
+		System.out.println(biases[1].length);
+		
+
 		SGD();
+		System.out.println(Arrays.toString(digitsAns));
+		System.out.println(Arrays.toString(digits));
+
+		SGD();
+		System.out.println(Arrays.toString(digitsAns));
+		System.out.println(Arrays.toString(digits));
 	}
 
 	// function that creates the weights and biases for the network
@@ -156,6 +179,8 @@ public class Assignment2 {
 			// sets gradients to 0
 			reset();
 
+			//System.out.println(biasGradients[0][0]);
+
 			// iterates through mini batch
 			for (int k = 0; k < miniBatchSize; k++, j++) {
 
@@ -163,8 +188,16 @@ public class Assignment2 {
 				backProp(Arrays.copyOfRange(training_data[indices_copy[j]], 1, training_data[indices_copy[j]].length), indices_copy[j]);
 			}
 
+			// System.out.println(biasGradients[0][0]);
+
 			// updates gradients
 			updateGradients();
+/* 
+			System.out.println(biasGradients[0][0]);
+
+			System.out.println(); */
+
+
 		}
 	}
 
@@ -174,7 +207,7 @@ public class Assignment2 {
 		// array of activations for each layer
 		double[][] activations = new double[biases.length + 1][]; 
 
-		int[] OHV = oneHotVector(training_data[index][0]);
+		double[] OHV = oneHotVector(training_data[index][0]);
 
 		// set first layer to input
 		activations[0] = a;
@@ -203,9 +236,14 @@ public class Assignment2 {
 			// replace the input array with the activation values of the current layer
 			a = activations[i + 1];
 		}
+
+		// update the number of correct answers
+		if (findMaxIndex(a) == findMaxIndex(OHV)) {
+			digitsAns[findMaxIndex(a)]++;
+		}
 		
 		// iterates through layers
-		for(int i = biases.length - 1; i > 0; i--) {
+		for(int i = biases.length - 1; i >= 0; i--) {
 
 			// iterates through nodes
 			for(int j = 0; j < weights[i].length; j++) {
@@ -216,10 +254,15 @@ public class Assignment2 {
 				// if not on the final layer
 				if (i != biases.length - 1) {
 
+					/* System.out.println("biasGradients[" + i + " + 1] length " + biasGradients[i + 1].length);
+					System.out.println("weights[" + i + "][" + j + "] length " + weights[i][j].length); */
 					// add to sum of weights times bias gradient
 					for(int k = 0; k < weights[i][j].length; k++) {
-
-						sumWB += weights[i + 1][j][k] * biasGradients[i + 1][j];
+						/* System.out.println("i: " + i);
+						System.out.println("j: " + j);
+						System.out.println("k: " + k);
+						System.out.println(); */
+						sumWB += weights[i][j][k] * biasGradients[i][j];
 					}
 					// add to bias gradient
 					biasGradients[i][j] += sumWB * activations[i + 1][j] * (1 - activations[i + 1][j]);
@@ -235,6 +278,7 @@ public class Assignment2 {
 
 					weightGradients[i][j][k] += activations[i][j] * biasGradients[i][j];
 				}
+				System.out.println(biasGradients[0][0]);
 			}
 		}
 	}
@@ -261,27 +305,6 @@ public class Assignment2 {
 		}
 	}
 
-	// creates one hot vector of expected
-	public static int[] oneHotVector(double expectedOut) {
-
-		// initialize empty one hot vector
-		int[] OHV = new int[biases[biases.length - 1].length];
-
-		// iterates through OHV indices
-		for (int i = 0; i < OHV.length; i++) {
-
-			// set to 1 if index matches output
-			if (i == expectedOut * 255) {
-				OHV[i] = 1;
-			}
-			// set to 0 otherwise
-			else {
-				OHV[i] = 0;
-			}
-		}
-		return OHV;
-	}
-
 	// performs feed forward pass on given testing data (not used in backProp function)
 	public static double[] feedForward(double[] a) {
 
@@ -299,7 +322,7 @@ public class Assignment2 {
 
 				// iterates through input for the node
 				for (int k = 0; k < weights[i][j].length; k++) {
-					
+
 					// add to sum of activation values times weights
 					sumWA += a[k] * weights[i][j][k];
 				}
@@ -311,6 +334,47 @@ public class Assignment2 {
 		}
 		// returns the activation values of the final layer of the network
 		return a;
+	}
+
+	// creates one hot vector of expected
+	public static double[] oneHotVector(double expectedOut) {
+
+		// initialize empty one hot vector
+		double[] OHV = new double[biases[biases.length - 1].length];
+
+		// iterates through OHV indices
+		for (int i = 0; i < OHV.length; i++) {
+
+			// set to 1 if index matches output
+			if (i == expectedOut * 255) {
+				OHV[i] = 1;
+			}
+			// set to 0 otherwise
+			else {
+				OHV[i] = 0;
+			}
+		}
+		return OHV;
+	}
+
+	// finds the index of the larges value in the array
+	public static int findMaxIndex(double[] ans) {
+
+		// set starting values for max and max index
+		double max = ans[0];
+		int maxIndex = 0;
+
+		// iterate through ans
+		for (int i = 1; i < ans.length; i++) {
+
+			// update max and max index if new max is found
+			if (ans[i] > max) {
+				max = ans[i];
+				maxIndex = i;
+			}
+		}
+
+		return maxIndex;
 	}
 
 	// sigmoid activation function
