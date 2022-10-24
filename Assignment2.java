@@ -39,8 +39,12 @@ public class Assignment2 {
 	public static double[][] biasGradients = new double[2][];
 	public static double[][][] weightGradients = new double[2][][];
 
+	public static int epochs = 30;
+
 	// start here
 	public static void main(String[] args) throws Exception{
+
+		boolean networkLoaded = false;
 
 		// create a new file from the .csv training file
 		Scanner train = new Scanner(new File(System.getProperty("user.dir") + "\\mnist_train.csv"));
@@ -77,20 +81,115 @@ public class Assignment2 {
 
 		// create the network
 		int[] nodesPerLayer = {784,15,10};
-		Network(nodesPerLayer);	
+		createNetwork(nodesPerLayer);	
 
-		for (i = 0; i < 30; i++) {
+		Scanner input = new Scanner(System.in);
+		int userInput;
+		int accuracy;
+
+		do {
+			System.out.println("[1] Train the network");
+			System.out.println("[2] Load a pre-trained network");
+			if (networkLoaded) {
+				System.out.println("[3] Display network accuracy on training data");
+				System.out.println("[4] Display network accuracy on testing data");
+				System.out.println("[5] Save the network state to file");
+			}
+			System.out.println("[0] Exit");
+			userInput = input.nextInt();
+
+			switch (userInput) {
+				case 0:
+					break;
+
+				case 1:
+					networkLoaded = true;
+					for (i = 0; i < epochs; i++) {
+						SGD();
+
+						accuracy = 0;
+						for (int k = 0; k < digits.length; k++) {
+							System.out.print(k + " = " + digitsAns[k] + "/" + digits[k] + " ");
+							accuracy += digitsAns[k];
+						}
+						System.out.println("Accurracy = " + accuracy + "/60000 = " + calcPercent() + "%");
+
+						if (i < epochs){
+							resetDigits();
+						}
+					}
+					break;
+
+				case 2: 
+					networkLoaded = true;
+					loadNetwork();
+					break;
+				
+				case 3:
+					break;
+
+				case 4:
+					break;
+
+				case 5:
+					saveNetwork();
+					break;
+
+				default:
+					System.out.println("Please input a valid number");
+					break;
+			}
+
+		} while (userInput != 0);
+		
+		/* for (i = 0; i < 30; i++) {
 			SGD();
 			System.out.println(Arrays.toString(digitsAns) + " " + calcPercent() + "%");
 			if (i < 29){
 				resetDigits();
 			}
 		}
-		System.out.println(Arrays.toString(digits));
+		System.out.println(Arrays.toString(digits)); */
+	}
+
+	public static void loadNetwork() {
+		try {
+			ObjectInputStream loadWeights = new ObjectInputStream(new FileInputStream("savedWeights"));
+			ObjectInputStream loadBiases = new ObjectInputStream(new FileInputStream("savedBiases"));
+
+			weights = (double[][][])loadWeights.readObject();
+			biases = (double[][])loadBiases.readObject();
+
+			loadWeights.close();
+			loadBiases.close();
+		} 
+		catch (IOException e) {
+			System.out.println("File load error");
+		}
+		catch (ClassNotFoundException c) {
+			System.out.println("File read error");
+		}
+
+	}
+
+	public static void saveNetwork() {
+		try {
+			ObjectOutputStream savedWeights = new ObjectOutputStream(new FileOutputStream("savedWeights"));
+			ObjectOutputStream savedBiases = new ObjectOutputStream(new FileOutputStream("savedBiases"));
+
+			savedWeights.writeObject(weights);
+			savedBiases.writeObject(biases);
+
+			savedWeights.close();
+			savedBiases.close();
+
+		} catch (IOException e) {
+			System.out.println("File creation error");
+		}
 	}
 
 	// function that creates the weights and biases for the network
-	public static void Network(int[] nodes) {
+	public static void createNetwork(int[] nodes) {
 
 		// for loop that iterates through each layer
 		for(int i = 0; i < nodes.length - 1; i++) {
@@ -246,13 +345,13 @@ public class Assignment2 {
 			for(int j = 0; j < biases[i].length; j++) {
 
 				// update bias
-				biases[i][j] -= 0.4/10.0 * biasGradients[i][j];
+				biases[i][j] -= 0.45/10.0 * biasGradients[i][j];
 
 				// iterates through weights
 				for(int k = 0; k < weights[i][j].length; k++) {
 
 					// update weight
-					weights[i][j][k] -= 0.4/10.0 * weightGradients[i][j][k];
+					weights[i][j][k] -= 0.45/10.0 * weightGradients[i][j][k];
 				}
 			}
 		}
