@@ -141,15 +141,7 @@ public class Assignment2 {
 			}
 
 		} while (userInput != 0);
-		
-		/* for (i = 0; i < 30; i++) {
-			SGD();
-			System.out.println(Arrays.toString(digitsAns) + " " + calcPercent() + "%");
-			if (i < 29){
-				resetDigits();
-			}
-		}
-		System.out.println(Arrays.toString(digits)); */
+		input.close();
 	}
 
 	public static void loadNetwork() {
