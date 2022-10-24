@@ -157,6 +157,8 @@ public class Assignment2 {
 
 			// updates weights and biases
 			updateWB();
+
+			//System.out.println();
 		}
 	}
 
@@ -213,29 +215,29 @@ public class Assignment2 {
 
 			// add to weight gradients
 			for(int k = 0; k < weights[1][j].length; k++) {
-
-				weightGradients[1][j][k] += activations[1][j] * biasGradients[1][j];
+				weightGradients[1][j][k] += activations[1][k] * biasGradients[1][j];
 			}
 		}
 
 
 		// lth layers
 		// iterates through nodes
-		for(int j = 0; j < weights[1].length; j++) {
+		for(int j = 0; j < weights[0].length; j++) {
 
 			// starting value of sum of weights times bias gradient
 			double sumWB = 0;
 
 			// add to sum of weights times bias gradient
-			for(int k = 0; k < weights[1][j].length; k++) {
-				sumWB += weights[1][j][k] * biasGradients[1][j];
+			for(int k = 0; k < weights[1].length; k++) {
+				sumWB += weights[1][k][j] * biasGradients[1][k];
 			}
-			// add to bias gradient
+
 			biasGradients[0][j] += sumWB * activations[1][j] * (1 - activations[1][j]);
+
 
 			// add to weight gradients
 			for(int k = 0; k < weights[0][j].length; k++) {
-				weightGradients[0][j][k] += activations[0][j] * biasGradients[0][j];
+				weightGradients[0][j][k] += activations[0][k] * biasGradients[0][j];
 			}
 		}
 	}
@@ -250,13 +252,13 @@ public class Assignment2 {
 			for(int j = 0; j < biases[i].length; j++) {
 
 				// update bias
-				biases[i][j] -= 2.0/10.0 * biasGradients[i][j];
+				biases[i][j] -= 3.0/10.0 * biasGradients[i][j];
 
 				// iterates through weights
 				for(int k = 0; k < weights[i][j].length; k++) {
 
 					// update weight
-					weights[i][j][k] -= 2.0/10.0 * weightGradients[i][j][k];
+					weights[i][j][k] -= 3.0/10.0 * weightGradients[i][j][k];
 				}
 			}
 		}
@@ -343,14 +345,18 @@ public class Assignment2 {
 			// iterates through nodes
 			for(int j = 0; j < biases[i].length; j++) {
 
+				//System.out.println(i + " " + biasGradients[i][j]);
 				biasGradients[i][j] = 0;
 
+				//System.out.println();
 				// iterates through each input for the node
 				for(int k = 0; k < weights[i][j].length; k++) {
 
+					//System.out.println(weightGradients[i][j][k]);
 					weightGradients[i][j][k] = 0;
 				}
 			}
+			//System.out.println();
 		}
 	}
 
