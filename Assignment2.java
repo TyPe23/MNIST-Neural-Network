@@ -71,10 +71,6 @@ public class Assignment2 {
 			}
 		}
 
-		/* for (int k = 0; k < 60000; k++) {
-			digits[(int)(training_data[k][0] * 255)] += 1;
-		} */
-
 		// close the .csv file before exiting
 		train.close();
 		test.close();
@@ -83,10 +79,10 @@ public class Assignment2 {
 		int[] nodesPerLayer = {784,15,10};
 		Network(nodesPerLayer);	
 
-		for (i = 0; i < 1000; i++) {
+		for (i = 0; i < 30; i++) {
 			SGD();
 			System.out.println(Arrays.toString(digitsAns) + " " + calcPercent() + "%");
-			if (i < 999){
+			if (i < 29){
 				resetDigits();
 			}
 		}
@@ -157,8 +153,6 @@ public class Assignment2 {
 
 			// updates weights and biases
 			updateWB();
-
-			//System.out.println();
 		}
 	}
 
@@ -252,13 +246,13 @@ public class Assignment2 {
 			for(int j = 0; j < biases[i].length; j++) {
 
 				// update bias
-				biases[i][j] -= 1.85/10.0 * biasGradients[i][j];
+				biases[i][j] -= 0.4/10.0 * biasGradients[i][j];
 
 				// iterates through weights
 				for(int k = 0; k < weights[i][j].length; k++) {
 
 					// update weight
-					weights[i][j][k] -= 1.85/10.0 * weightGradients[i][j][k];
+					weights[i][j][k] -= 0.4/10.0 * weightGradients[i][j][k];
 				}
 			}
 		}
