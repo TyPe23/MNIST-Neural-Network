@@ -4,3 +4,8 @@ k = 0-783
 					w.length = 2		biases.length = 2
 a.length = 784		w[].length = 15		biases[].length = 15
 					w[][].length = 784	
+
+
+activations[0]		activations[1]		activations[2]
+weights[0]			weights[1]
+					biases[0]			biases[1]
