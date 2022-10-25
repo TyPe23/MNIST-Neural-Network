@@ -126,13 +126,41 @@ public class Assignment2 {
 					break;
 				
 				case 3:
+					if (networkLoaded) {
+						feedForward(training_data);
+
+						accuracy = 0;
+						for (int k = 0; k < digits.length; k++) {
+							System.out.print(k + " = " + digitsAns[k] + "/" + digits[k] + " ");
+							accuracy += digitsAns[k];
+						}
+						System.out.println("Accurracy = " + accuracy + "/60000 = " + calcPercent() + "%");
+
+						resetDigits();
+					}
+					
 					break;
 
 				case 4:
+					if (networkLoaded) {
+						feedForward(testing_data);
+
+						accuracy = 0;
+						for (int k = 0; k < digits.length; k++) {
+							System.out.print(k + " = " + digitsAns[k] + "/" + digits[k] + " ");
+							accuracy += digitsAns[k];
+						}
+						System.out.println("Accurracy = " + accuracy + "/10000 = " + calcPercent() + "%");
+
+						resetDigits();
+					}
+						
 					break;
 
 				case 5:
-					saveNetwork();
+					if (networkLoaded) {
+						saveNetwork();
+					}
 					break;
 
 				default:
@@ -141,6 +169,10 @@ public class Assignment2 {
 			}
 
 		} while (userInput != 0);
+<<<<<<< Updated upstream
+=======
+		
+>>>>>>> Stashed changes
 		input.close();
 	}
 
@@ -337,47 +369,56 @@ public class Assignment2 {
 			for(int j = 0; j < biases[i].length; j++) {
 
 				// update bias
-				biases[i][j] -= 0.45/10.0 * biasGradients[i][j];
+				biases[i][j] -= 0.5/10.0 * biasGradients[i][j];
 
 				// iterates through weights
 				for(int k = 0; k < weights[i][j].length; k++) {
 
 					// update weight
-					weights[i][j][k] -= 0.45/10.0 * weightGradients[i][j][k];
+					weights[i][j][k] -= 0.5/10.0 * weightGradients[i][j][k];
 				}
 			}
 		}
 	}
 
 	// performs feed forward pass on given testing data (not used in backProp function)
-	public static double[] feedForward(double[] a) {
+	public static void feedForward(double[][] a) {
 
-		// iterates through layers
-		for (int i = 0; i < biases.length; i++) {
+		for (int x = 0; x < a.length; x++) {
+			
+			double[] input = Arrays.copyOfRange(a[x], 1, a[x].length);
 
-			// temporary array of doubles with a length equal to the number of nodes in the layer
-			double[] temp = new double[biases[i].length]; 
+			// iterates through layers
+			for (int i = 0; i < biases.length; i++) {
 
-			// iterates through node
-			for (int j = 0; j < weights[i].length; j++) {
+				// temporary array of doubles with a length equal to the number of nodes in the layer
+				double[] temp = new double[biases[i].length]; 
 
-				// starting value of sum of activation values times weights
-				double sumWA = 0;
+				// iterates through node
+				for (int j = 0; j < weights[i].length; j++) {
 
-				// iterates through input for the node
-				for (int k = 0; k < weights[i][j].length; k++) {
+					// starting value of sum of activation values times weights
+					double sumWA = 0;
 
-					// add to sum of activation values times weights
-					sumWA += a[k] * weights[i][j][k];
+					// iterates through input for the node
+					for (int k = 0; k < weights[i][j].length; k++) {
+
+						// add to sum of activation values times weights
+						sumWA += input[k] * weights[i][j][k];
+					}
+					// set the result of the sigmoid to the current index of temp
+					temp[j] = sigmoid(sumWA + biases[i][j]);
 				}
-				// set the result of the sigmoid to the current index of temp
-				temp[j] = sigmoid(sumWA + biases[i][j]);
+				// replace the input array with the activation values of the current layer
+				input = temp;
 			}
-			// replace the input array with the activation values of the current layer
-			a = temp;
+			// update the number of correct answers
+			if (findMaxIndex(input) == a[x][0] * 255) {
+				digitsAns[(int)(a[x][0] * 255)]++;
+			}
+
+			digits[(int)(training_data[x][0] * 255)]++;
 		}
-		// returns the activation values of the final layer of the network
-		return a;
 	}
 
 	// creates one hot vector of expected
