@@ -169,10 +169,7 @@ public class Assignment2 {
 			}
 
 		} while (userInput != 0);
-<<<<<<< Updated upstream
-=======
-		
->>>>>>> Stashed changes
+
 		input.close();
 	}
 
