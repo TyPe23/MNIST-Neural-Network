@@ -99,6 +99,7 @@ public class Assignment2 {
 		// loop that asks for user input
 		do {
 			// displays options to the user
+			System.out.println();
 			System.out.println("[1] Train the network");
 			System.out.println("[2] Load a pre-trained network");
 			if (networkLoaded) {
