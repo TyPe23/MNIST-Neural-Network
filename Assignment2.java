@@ -4,7 +4,12 @@
 	10/10/2022
 	Assignment 2
 
-	DON'T FORGET THE DESCRIPTION
+	Three layer, back propagated, sigmoid neural network
+	Neural network is designed to solve the MNIST problem of correctly identifying handwritten digits
+	Gives the user the ability to train their own network, 
+	save that network to a file, 
+	load a network from a file,
+	and test their network on training and/or testing data
 */
 
 
@@ -47,6 +52,7 @@ public class Assignment2 {
 	// start here
 	public static void main(String[] args) throws Exception{
 
+		// boolean value reflecting if the network has weights and biases
 		boolean networkLoaded = false;
 
 		// create a new file from the .csv training file
@@ -92,6 +98,7 @@ public class Assignment2 {
 
 		// loop that asks for user input
 		do {
+			// displays options to the user
 			System.out.println("[1] Train the network");
 			System.out.println("[2] Load a pre-trained network");
 			if (networkLoaded) {
@@ -104,101 +111,141 @@ public class Assignment2 {
 			userInput = input.nextInt();
 			System.out.println();
 
+			// different actions based on user input
 			switch (userInput) {
+				// exits
 				case 0:
 					break;
 
+				// trains
 				case 1:
+					// changes bool to true allowing values 3, 4, & 5
 					networkLoaded = true;
 
+					// resets the weights and biases to their starting values to retrain the network
 					resetWB();
 
+					// iterates 
 					for (i = 0; i < epochs; i++) {
+
+						// performs stochastic gradient descent
 						SGD();
 
+						// resets the accuracy to 0
 						accuracy = 0;
 
+						// prints out the number correct/total number of each digit and updates accuracy
 						for (int k = 0; k < digits.length; k++) {
 							System.out.print(k + " = " + digitsAns[k] + "/" + digits[k] + " ");
 							accuracy += digitsAns[k];
 						}
+						// prints accuracy
 						System.out.println("Accurracy = " + accuracy + "/60000 = " + calcPercent() + "%");
 
+						// resets the digit totals and correct answers
 						if (i < epochs){
 							resetDigits();
 						}
 					}
 					break;
 
+				// loads
 				case 2: 
+					// changes bool to true allowing values 3, 4, & 5
 					networkLoaded = true;
 					loadNetwork();
-					startingBiases = biases.clone();
-					startingWeights = weights.clone();
 					break;
 				
+				// tests on training data
 				case 3:
+					// checks if network has weights and biases
 					if (networkLoaded) {
+						// performs feed forward passes over training data
 						feedForward(training_data);
 
+						// resets accuracy to 0
 						accuracy = 0;
+
+						// prints out the number correct/total number of each digit and updates accuracy
 						for (int k = 0; k < digits.length; k++) {
 							System.out.print(k + " = " + digitsAns[k] + "/" + digits[k] + " ");
 							accuracy += digitsAns[k];
 						}
+						// prints accuracy
 						System.out.println("Accurracy = " + accuracy + "/60000 = " + calcPercent() + "%");
 
+						// resets the digit totals and correct answers
 						resetDigits();
 					}
 					
 					break;
 
+				// tests on testing data
 				case 4:
+					// checks if network has weights and biases
 					if (networkLoaded) {
+						// performs feed forward passes over training data
 						feedForward(testing_data);
 
+						// resets accuracy to 0
 						accuracy = 0;
+
+						// prints out the number correct/total number of each digit and updates accuracy
 						for (int k = 0; k < digits.length; k++) {
 							System.out.print(k + " = " + digitsAns[k] + "/" + digits[k] + " ");
 							accuracy += digitsAns[k];
 						}
+						// prints accuracy
 						System.out.println("Accurracy = " + accuracy + "/10000 = " + calcPercent() + "%");
 
+						// resets the digit totals and correct answers
 						resetDigits();
 					}
 						
 					break;
 
+				// saves
 				case 5:
+					// checks if network has weights and biases
 					if (networkLoaded) {
 						saveNetwork();
 					}
 					break;
 
+				// invalid input
 				default:
 					System.out.println("Please enter a valid input");
 					System.out.println();
 					break;
 			}
-
+			// exits if input is 0
 		} while (userInput != 0);
 
+		// closes input scanner before exiting
 		input.close();
 	}
 
+
+	// loads saved weights and biases
 	public static void loadNetwork() {
 		try {
+			// opens input streams of weights and biases files
 			ObjectInputStream loadWeights = new ObjectInputStream(new FileInputStream("savedWeights"));
 			ObjectInputStream loadBiases = new ObjectInputStream(new FileInputStream("savedBiases"));
 
+			// loads saved weights from input stream to weights and also sets them as the starting weights
 			weights = (double[][][])loadWeights.readObject();
 			startingWeights = (double[][][])loadWeights.readObject();
+
+			// loads saved biases from input stream to biases and also sets them as the starting biases
 			biases = (double[][])loadBiases.readObject();
 			startingBiases = (double[][])loadBiases.readObject();
 
+			// closes input streams
 			loadWeights.close();
 			loadBiases.close();
 		} 
+		// error handling for file load and file read errors
 		catch (IOException e) {
 			System.out.println("File load error");
 		}
@@ -208,21 +255,29 @@ public class Assignment2 {
 
 	}
 
+
+	// saves weights and biases to new files
 	public static void saveNetwork() {
 		try {
+			// opens output streams for weights and biases files
 			ObjectOutputStream savedWeights = new ObjectOutputStream(new FileOutputStream("savedWeights"));
 			ObjectOutputStream savedBiases = new ObjectOutputStream(new FileOutputStream("savedBiases"));
 
+			// writes weights and biases to files
 			savedWeights.writeObject(weights);
 			savedBiases.writeObject(biases);
 
+			// closes output streams
 			savedWeights.close();
 			savedBiases.close();
 
-		} catch (IOException e) {
+		} 
+		// error handling for file creation error
+		catch (IOException e) {
 			System.out.println("File creation error");
 		}
 	}
+
 
 	// function that creates the weights and biases for the network
 	public static void createNetwork(int[] nodes) {
@@ -230,12 +285,12 @@ public class Assignment2 {
 		// for loop that iterates through each layer
 		for(int i = 0; i < nodes.length - 1; i++) {
 
-			// allocates the memory for bias
+			// allocates the memory for bias, starting bias and bias gradient
 			biases[i] = new double[nodes[i + 1]];
 			startingBiases[i] = new double[nodes[i + 1]];
 			biasGradients[i] = new double[nodes[i + 1]];
 
-			// allocates the memory for weight
+			// allocates the memory for weight, starting weight and weight gradient
 			weights[i] = new double[nodes[i + 1]][nodes[i]];
 			startingWeights[i] = new double[nodes[i + 1]][nodes[i]];
 			weightGradients[i] = new double[nodes[i + 1]][nodes[i]];
@@ -245,7 +300,9 @@ public class Assignment2 {
 
 				// random values from -1 to 1 
 				biases[i][j] = Math.random() * 2 - 1;
+				// sets starting bias to bias
 				startingBiases[i][j] = biases[i][j];
+				// sets bias gradient to 0
 				biasGradients[i][j] = 0;
 
 				// for loop that iterates through each weight
@@ -253,12 +310,15 @@ public class Assignment2 {
 
 					// random value from -1 to 1
 					weights[i][j][k] = Math.random() * 2 - 1;
+					// sets starting weight to weight
 					startingWeights[i][j][k] = weights[i][j][k];
+					// sets weight gradient to 0
 					weightGradients[i][j][k] = 0;
 				}
 			}
 		}
 	}
+
 
 	// performs Stochastic Gradient Descent
 	public static void SGD() {
@@ -269,14 +329,18 @@ public class Assignment2 {
 
 		// randomize training indicies
 		for(int i = 0; i < indices_copy.length; i++) {
-
+			// creates random index
 			int randIndx = rand.nextInt(indices_copy.length);
+			// saves value at random index
 			int temp = indices_copy[randIndx];
+			// replaces value at random index
 			indices_copy[randIndx] = indices_copy[i];
+			// replaces value at index i with saved value
 			indices_copy[i] = temp;
 		}
 
 		int miniBatchSize = 10;
+
 		// iterates through training data
 		for (int j = 0; j < indices_copy.length;) {
 
@@ -294,6 +358,7 @@ public class Assignment2 {
 			updateWB();
 		}
 	}
+
 
 	// performs back propagation
 	public static void backProp(double[] a, int index) {
@@ -365,6 +430,7 @@ public class Assignment2 {
 				sumWB += weights[1][k][j] * biasGradients[1][k];
 			}
 
+			// add to bias gradients
 			biasGradients[0][j] += sumWB * activations[1][j] * (1 - activations[1][j]);
 
 
@@ -374,6 +440,7 @@ public class Assignment2 {
 			}
 		}
 	}
+
 
 	// performs gradient updates
 	public static void updateWB() {
@@ -396,6 +463,7 @@ public class Assignment2 {
 			}
 		}
 	}
+
 
 	// performs feed forward pass on given testing data (not used in backProp function)
 	public static void feedForward(double[][] a) {
@@ -432,10 +500,11 @@ public class Assignment2 {
 			if (findMaxIndex(input) == a[x][0] * 255) {
 				digitsAns[(int)(a[x][0] * 255)]++;
 			}
-
+			// update the number of digits tried
 			digits[(int)(training_data[x][0] * 255)]++;
 		}
 	}
+
 
 	// creates one hot vector of expected
 	public static double[] oneHotVector(double expectedOut) {
@@ -458,6 +527,7 @@ public class Assignment2 {
 		return OHV;
 	}
 
+
 	// finds the index of the larges value in the array
 	public static int findMaxIndex(double[] ans) {
 
@@ -478,6 +548,7 @@ public class Assignment2 {
 		return maxIndex;
 	}
 
+
 	// resets weight and bias gradients to 0
 	public static void reset() {
 
@@ -497,6 +568,7 @@ public class Assignment2 {
 			}
 		}
 	}
+
 
 	// resets weight and bias gradients to 0
 	public static void resetWB() {
@@ -522,6 +594,8 @@ public class Assignment2 {
 		}
 	}
 
+
+	// resets the values of correct numbers and total numbers per digit
 	public static void resetDigits() {
 		for (int i = 0; i < digitsAns.length; i++) {
 			digitsAns[i] = 0;
@@ -529,7 +603,9 @@ public class Assignment2 {
 		}
 	}
 
-	public static float calcPercent() {
+
+	// calculates the accuracy percentage
+	public static double calcPercent() {
 		float ans = 0.0f;
 		float tot = 0.0f;
 
@@ -538,7 +614,8 @@ public class Assignment2 {
 			tot += digits[i];
 		}
 
-		return (ans / tot) * 100;
+		// returns percentage rounded to two decimal places
+		return Math.round(((ans / tot) * 100) * 100) / 100.0;
 	}
 
 	// sigmoid activation function
