@@ -35,6 +35,9 @@ public class Assignment2 {
 	public static double[][] biases = new double[2][];
 	public static double[][][] weights = new double[2][][];
 
+	public static double[][] startingBiases = new double[2][];
+	public static double[][][] startingWeights = new double[2][][];
+
 	// multidementional arrays of weight and bias gradients
 	public static double[][] biasGradients = new double[2][];
 	public static double[][][] weightGradients = new double[2][][];
@@ -82,13 +85,12 @@ public class Assignment2 {
 		// create the network
 		int[] nodesPerLayer = {784,15,10};
 		createNetwork(nodesPerLayer);	
-		double[][] startingBiases = biases;
-		double[][][] startingWeights = weights;
 
 		Scanner input = new Scanner(System.in);
 		int userInput;
 		int accuracy;
 
+		// loop that asks for user input
 		do {
 			System.out.println("[1] Train the network");
 			System.out.println("[2] Load a pre-trained network");
@@ -109,13 +111,13 @@ public class Assignment2 {
 				case 1:
 					networkLoaded = true;
 
-					biases = startingBiases;
-					weights = startingWeights;
+					resetWB();
 
 					for (i = 0; i < epochs; i++) {
 						SGD();
 
 						accuracy = 0;
+
 						for (int k = 0; k < digits.length; k++) {
 							System.out.print(k + " = " + digitsAns[k] + "/" + digits[k] + " ");
 							accuracy += digitsAns[k];
@@ -131,8 +133,8 @@ public class Assignment2 {
 				case 2: 
 					networkLoaded = true;
 					loadNetwork();
-					startingBiases = biases;
-					startingWeights = weights;
+					startingBiases = biases.clone();
+					startingWeights = weights.clone();
 					break;
 				
 				case 3:
@@ -174,7 +176,8 @@ public class Assignment2 {
 					break;
 
 				default:
-					System.out.println("Please input a valid number");
+					System.out.println("Please enter a valid input");
+					System.out.println();
 					break;
 			}
 
@@ -189,7 +192,9 @@ public class Assignment2 {
 			ObjectInputStream loadBiases = new ObjectInputStream(new FileInputStream("savedBiases"));
 
 			weights = (double[][][])loadWeights.readObject();
+			startingWeights = (double[][][])loadWeights.readObject();
 			biases = (double[][])loadBiases.readObject();
+			startingBiases = (double[][])loadBiases.readObject();
 
 			loadWeights.close();
 			loadBiases.close();
@@ -227,10 +232,12 @@ public class Assignment2 {
 
 			// allocates the memory for bias
 			biases[i] = new double[nodes[i + 1]];
+			startingBiases[i] = new double[nodes[i + 1]];
 			biasGradients[i] = new double[nodes[i + 1]];
 
 			// allocates the memory for weight
 			weights[i] = new double[nodes[i + 1]][nodes[i]];
+			startingWeights[i] = new double[nodes[i + 1]][nodes[i]];
 			weightGradients[i] = new double[nodes[i + 1]][nodes[i]];
 
 			// iterates through each input for the node
@@ -238,6 +245,7 @@ public class Assignment2 {
 
 				// random values from -1 to 1 
 				biases[i][j] = Math.random() * 2 - 1;
+				startingBiases[i][j] = biases[i][j];
 				biasGradients[i][j] = 0;
 
 				// for loop that iterates through each weight
@@ -245,6 +253,7 @@ public class Assignment2 {
 
 					// random value from -1 to 1
 					weights[i][j][k] = Math.random() * 2 - 1;
+					startingWeights[i][j][k] = weights[i][j][k];
 					weightGradients[i][j][k] = 0;
 				}
 			}
@@ -376,13 +385,13 @@ public class Assignment2 {
 			for(int j = 0; j < biases[i].length; j++) {
 
 				// update bias
-				biases[i][j] -= 0.55/10.0 * biasGradients[i][j];
+				biases[i][j] -= 0.5/10.0 * biasGradients[i][j];
 
 				// iterates through weights
 				for(int k = 0; k < weights[i][j].length; k++) {
 
 					// update weight
-					weights[i][j][k] -= 0.55/10.0 * weightGradients[i][j][k];
+					weights[i][j][k] -= 0.5/10.0 * weightGradients[i][j][k];
 				}
 			}
 		}
@@ -478,15 +487,35 @@ public class Assignment2 {
 			// iterates through nodes
 			for(int j = 0; j < biases[i].length; j++) {
 
-				//System.out.println(i + " " + biasGradients[i][j]);
 				biasGradients[i][j] = 0;
+
+				// iterates through each input for the node
+				for(int k = 0; k < weights[i][j].length; k++) {
+
+					weightGradients[i][j][k] = 0;
+				}
+			}
+		}
+	}
+
+	// resets weight and bias gradients to 0
+	public static void resetWB() {
+
+		// iterates through layers
+		for(int i = 0; i < biases.length; i++) {
+
+			// iterates through nodes
+			for(int j = 0; j < biases[i].length; j++) {
+
+				//System.out.println(i + " " + biasGradients[i][j]);
+				biases[i][j] = startingBiases[i][j];
 
 				//System.out.println();
 				// iterates through each input for the node
 				for(int k = 0; k < weights[i][j].length; k++) {
 
 					//System.out.println(weightGradients[i][j][k]);
-					weightGradients[i][j][k] = 0;
+					weights[i][j][k] = startingWeights[i][j][k];
 				}
 			}
 			//System.out.println();
