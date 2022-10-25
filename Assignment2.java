@@ -89,7 +89,7 @@ public class Assignment2 {
 		test.close();
 
 		// create the network
-		int[] nodesPerLayer = {784,15,10};
+		int[] nodesPerLayer = {784,100,10};
 		createNetwork(nodesPerLayer);	
 
 		Scanner input = new Scanner(System.in);
@@ -233,13 +233,11 @@ public class Assignment2 {
 			ObjectInputStream loadWeights = new ObjectInputStream(new FileInputStream("savedWeights"));
 			ObjectInputStream loadBiases = new ObjectInputStream(new FileInputStream("savedBiases"));
 
-			// loads saved weights from input stream to weights and also sets them as the starting weights
+			// loads saved weights from input stream to weights 
 			weights = (double[][][])loadWeights.readObject();
-			startingWeights = (double[][][])loadWeights.readObject();
 
-			// loads saved biases from input stream to biases and also sets them as the starting biases
+			// loads saved biases from input stream to biases
 			biases = (double[][])loadBiases.readObject();
-			startingBiases = (double[][])loadBiases.readObject();
 
 			// closes input streams
 			loadWeights.close();
@@ -452,13 +450,13 @@ public class Assignment2 {
 			for(int j = 0; j < biases[i].length; j++) {
 
 				// update bias
-				biases[i][j] -= 0.5/10.0 * biasGradients[i][j];
+				biases[i][j] -= 0.45/10.0 * biasGradients[i][j];
 
 				// iterates through weights
 				for(int k = 0; k < weights[i][j].length; k++) {
 
 					// update weight
-					weights[i][j][k] -= 0.5/10.0 * weightGradients[i][j][k];
+					weights[i][j][k] -= 0.45/10.0 * weightGradients[i][j][k];
 				}
 			}
 		}
