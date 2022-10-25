@@ -82,6 +82,8 @@ public class Assignment2 {
 		// create the network
 		int[] nodesPerLayer = {784,15,10};
 		createNetwork(nodesPerLayer);	
+		double[][] startingBiases = biases;
+		double[][][] startingWeights = weights;
 
 		Scanner input = new Scanner(System.in);
 		int userInput;
@@ -96,7 +98,9 @@ public class Assignment2 {
 				System.out.println("[5] Save the network state to file");
 			}
 			System.out.println("[0] Exit");
+			System.out.println();
 			userInput = input.nextInt();
+			System.out.println();
 
 			switch (userInput) {
 				case 0:
@@ -104,6 +108,10 @@ public class Assignment2 {
 
 				case 1:
 					networkLoaded = true;
+
+					biases = startingBiases;
+					weights = startingWeights;
+
 					for (i = 0; i < epochs; i++) {
 						SGD();
 
@@ -123,6 +131,8 @@ public class Assignment2 {
 				case 2: 
 					networkLoaded = true;
 					loadNetwork();
+					startingBiases = biases;
+					startingWeights = weights;
 					break;
 				
 				case 3:
@@ -366,13 +376,13 @@ public class Assignment2 {
 			for(int j = 0; j < biases[i].length; j++) {
 
 				// update bias
-				biases[i][j] -= 0.5/10.0 * biasGradients[i][j];
+				biases[i][j] -= 0.55/10.0 * biasGradients[i][j];
 
 				// iterates through weights
 				for(int k = 0; k < weights[i][j].length; k++) {
 
 					// update weight
-					weights[i][j][k] -= 0.5/10.0 * weightGradients[i][j][k];
+					weights[i][j][k] -= 0.55/10.0 * weightGradients[i][j][k];
 				}
 			}
 		}
