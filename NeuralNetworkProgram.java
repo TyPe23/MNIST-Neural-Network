@@ -21,7 +21,7 @@ import java.util.Arrays;
 import java.util.Random;
 
 // main class
-public class Assignment2 {
+public class NeuralNetworkProgram {
 
 	// 2D arrays containing training and testing data
 	public static double[][] training_data = new double[60000][785];
