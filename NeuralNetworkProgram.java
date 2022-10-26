@@ -2,7 +2,7 @@
 	Ty Pederson
 	10349042
 	10/10/2022
-	Assignment 2
+	Neural Network Program
 
 	Three layer, back propagated, sigmoid neural network
 	Neural network is designed to solve the MNIST problem of correctly identifying handwritten digits
@@ -109,6 +109,13 @@ public class NeuralNetworkProgram {
 			}
 			System.out.println("[0] Exit");
 			System.out.println();
+			// check if the input is an integer
+			while (!input.hasNextInt()) {
+				System.out.println("Please enter an integer");
+				System.out.println();
+				input.next();
+				System.out.println();
+			}
 			userInput = input.nextInt();
 			System.out.println();
 
