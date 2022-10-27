@@ -49,6 +49,11 @@ public class NeuralNetworkProgram {
 
 	public static int epochs = 30;
 
+	public static boolean seeASCII = false;
+	public static boolean incorrectOnly = false;
+
+	public static Scanner inputScanner = new Scanner(System.in);
+
 	// start here
 	public static void main(String[] args) throws Exception{
 
@@ -92,7 +97,6 @@ public class NeuralNetworkProgram {
 		int[] nodesPerLayer = {784,100,10};
 		createNetwork(nodesPerLayer);	
 
-		Scanner input = new Scanner(System.in);
 		int userInput;
 		int accuracy;
 
@@ -100,23 +104,27 @@ public class NeuralNetworkProgram {
 		do {
 			// displays options to the user
 			System.out.println();
-			System.out.println("[1] Train the network");
-			System.out.println("[2] Load a pre-trained network");
+			System.out.println("[1] Train the network.");
+			System.out.println("[2] Load a pre-trained network.");
 			if (networkLoaded) {
-				System.out.println("[3] Display network accuracy on training data");
-				System.out.println("[4] Display network accuracy on testing data");
-				System.out.println("[5] Save the network state to file");
+				System.out.println("[3] Display network accuracy on training data.");
+				System.out.println("[4] Display network accuracy on testing data.");
+				System.out.println("[5] Save the network state to file.");
+				System.out.println("[6] Toggle ASCII display of outputs when selecting options 3 or 4.");
+				if (seeASCII) {
+					System.out.println("[7] Toggle ASCII for incorrect values only.");
+				}
 			}
-			System.out.println("[0] Exit");
+			System.out.println("[0] Exit.");
 			System.out.println();
 			// check if the input is an integer
-			while (!input.hasNextInt()) {
-				System.out.println("Please enter an integer");
+			while (!inputScanner.hasNextInt()) {
+				System.out.println("Please enter an integer.");
 				System.out.println();
-				input.next();
+				inputScanner.next();
 				System.out.println();
 			}
-			userInput = input.nextInt();
+			userInput = inputScanner.nextInt();
 			System.out.println();
 
 			// different actions based on user input
@@ -148,7 +156,7 @@ public class NeuralNetworkProgram {
 							accuracy += digitsAns[k];
 						}
 						// prints accuracy
-						System.out.println("Accurracy = " + accuracy + "/60000 = " + calcPercent() + "%");
+						System.out.println("Accurracy = " + accuracy + "/60000 = " + calcPercent() + "%.");
 
 						// resets the digit totals and correct answers
 						if (i < epochs){
@@ -180,7 +188,7 @@ public class NeuralNetworkProgram {
 							accuracy += digitsAns[k];
 						}
 						// prints accuracy
-						System.out.println("Accurracy = " + accuracy + "/60000 = " + calcPercent() + "%");
+						System.out.println("Accurracy = " + accuracy + "/60000 = " + calcPercent() + "%.");
 
 						// resets the digit totals and correct answers
 						resetDigits();
@@ -204,7 +212,7 @@ public class NeuralNetworkProgram {
 							accuracy += digitsAns[k];
 						}
 						// prints accuracy
-						System.out.println("Accurracy = " + accuracy + "/10000 = " + calcPercent() + "%");
+						System.out.println("Accurracy = " + accuracy + "/10000 = " + calcPercent() + "%.");
 
 						// resets the digit totals and correct answers
 						resetDigits();
@@ -220,9 +228,33 @@ public class NeuralNetworkProgram {
 					}
 					break;
 
+				// toggles ASCII display
+				case 6:
+					seeASCII = !seeASCII;
+					if (seeASCII) {
+						System.out.println("ASCII vaules will be displayed.");
+					}
+					else {
+						System.out.println("ASCII values will no longer be displayed.");
+					}
+					break;
+
+				// toggles ASCII values shown
+				case 7:
+					if (seeASCII) {
+						incorrectOnly = !incorrectOnly;
+						if (incorrectOnly) {
+							System.out.println("ASCII vaules will be displayed for incorrect values only.");
+						}
+						else {
+							System.out.println("ASCII values will be displayed for all values.");
+						}
+					}
+					break;
+
 				// invalid input
 				default:
-					System.out.println("Please enter a valid input");
+					System.out.println("Please enter a valid input.");
 					System.out.println();
 					break;
 			}
@@ -230,7 +262,7 @@ public class NeuralNetworkProgram {
 		} while (userInput != 0);
 
 		// closes input scanner before exiting
-		input.close();
+		inputScanner.close();
 	}
 
 
@@ -253,10 +285,10 @@ public class NeuralNetworkProgram {
 		} 
 		// error handling for file load and file read errors
 		catch (IOException e) {
-			System.out.println("File load error");
+			System.out.println("File load error.");
 		}
 		catch (ClassNotFoundException c) {
-			System.out.println("File read error");
+			System.out.println("File read error.");
 		}
 
 	}
@@ -280,7 +312,7 @@ public class NeuralNetworkProgram {
 		} 
 		// error handling for file creation error
 		catch (IOException e) {
-			System.out.println("File creation error");
+			System.out.println("File creation error.");
 		}
 	}
 
@@ -505,9 +537,16 @@ public class NeuralNetworkProgram {
 			// update the number of correct answers
 			if (findMaxIndex(input) == a[x][0] * 255) {
 				digitsAns[(int)(a[x][0] * 255)]++;
+				if (!incorrectOnly && seeASCII) {
+					displayDigit(a[x], x, findMaxIndex(input));
+				}
+			}
+			// calls dislplay function if the user selected to display incorrect digits
+			else if (seeASCII) {
+				displayDigit(a[x], x, findMaxIndex(input));
 			}
 			// update the number of digits tried
-			digits[(int)(training_data[x][0] * 255)]++;
+			digits[(int)(a[x][0] * 255)]++;
 		}
 	}
 
@@ -627,5 +666,50 @@ public class NeuralNetworkProgram {
 	// sigmoid activation function
 	public static double sigmoid(double z) {
 		return 1 / (1 + Math.exp(-z));
+	}
+
+	// displays the digits if selected by the user
+	public static void displayDigit(double[] input, int index, int output) {
+		// array of possible ASCII outputs
+		String[] symbol = {" ", ".", ",", ":", ";", "i", "Y", "H", "#", "&"};
+
+		System.out.print("Testing case #" + index + ": Correct classification = " + (int)(input[0] * 255) + " Network Output = " + output);
+
+		// checks if the network got the right answer
+		if ((input[0] * 255 == output)){
+			System.out.print(" Correct.");
+		}
+		else {
+			System.out.print(" Incorrect.");
+		}
+		System.out.println();
+
+		// iterates through each pixel value
+		for (int i = 1; i < input.length;) {
+
+			// iterates through each line
+			for (int j = 0; j < 28; j++, i++) {
+				System.out.print(symbol[(int) Math.floor(Math.abs(input[i] - 0.01) * 10.0)]);
+			}
+			System.out.print("\n");
+		}
+		
+		int userInput;
+
+		System.out.println("[1] Continue.");
+		System.out.println("[Any int] Finish without ASCII.");
+		System.out.println();
+		while (!inputScanner.hasNextInt()) {
+			System.out.println("Please enter an integer.");
+			System.out.println();
+			inputScanner.next();
+			System.out.println();
+		}
+		userInput = inputScanner.nextInt();
+
+		if (userInput != 1) {
+			seeASCII = false;
+		}
+		System.out.println();
 	}
 }
